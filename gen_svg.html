@@ -38,7 +38,11 @@ opentype.load(
         if (cmd.y1 !== undefined) { cmd.y1 -= bb.y1; }
       }
 
-      var svg_blob = new Blob(["<svg>", path.toSVG(), "</svg>"]);
+      var svg_blob = new Blob([
+        '<svg xmlns="http://www.w3.org/2000/svg">',
+        path.toSVG(),
+        "</svg>"],
+      );
       console.log(svg_blob)
       var svg_dl = document.createElement("a");
       svg_dl.href = URL.createObjectURL(svg_blob);
