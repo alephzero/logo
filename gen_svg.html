@@ -1,0 +1,49 @@
+<script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+
+<script>
+const url_params = new URLSearchParams(window.location.search);
+const font_size = parseFloat(url_params.get('font_size') || '100')
+
+opentype.load(
+    'gveret-levin/font-files/web/GveretLevinAlefAlefAlef-Regular.woff',
+    (err, font) => {
+      if (err) {
+        console.log('Font could not be loaded: ' + err);
+        return;
+      }
+
+      // The following should work, but doesn't :(
+      // const path = font.getPath('0א', 0, 100, 72);
+      //
+      // Instead, we do:
+      // ============================================
+      const aleph = font.glyphs.glyphs[7];
+      const zero = font.glyphs.glyphs[67];
+
+      const path = new opentype.Path();
+      const scale = 1 / font.unitsPerEm * font_size;
+
+      let x = 0;
+      const y = 0;
+      path.extend(zero.getPath(x, y, font_size))
+      x += zero.advanceWidth * scale
+      path.extend(aleph.getPath(x, y, font_size))
+      // ============================================
+
+      const bb = path.getBoundingBox();
+      for (let cmd of path.commands) {
+        if (cmd.x !== undefined) { cmd.x -= bb.x1; }
+        if (cmd.x1 !== undefined) { cmd.x1 -= bb.x1; }
+        if (cmd.y !== undefined) { cmd.y -= bb.y1; }
+        if (cmd.y1 !== undefined) { cmd.y1 -= bb.y1; }
+      }
+
+      var svg_blob = new Blob(["<svg>", path.toSVG(), "</svg>"]);
+      console.log(svg_blob)
+      var svg_dl = document.createElement("a");
+      svg_dl.href = URL.createObjectURL(svg_blob);
+      svg_dl.download = "alephzero.svg";
+      svg_dl.click();
+    }
+);
+</script>
