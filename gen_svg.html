@@ -2,7 +2,6 @@
 
 <script>
 const url_params = new URLSearchParams(window.location.search);
-const font_size = parseFloat(url_params.get('font_size') || '100')
 
 opentype.load(
     'gveret-levin/font-files/web/GveretLevinAlefAlefAlef-Regular.woff',
@@ -21,29 +20,23 @@ opentype.load(
       const zero = font.glyphs.glyphs[67];
 
       const path = new opentype.Path();
-      const scale = 1 / font.unitsPerEm * font_size;
+      const scale = 1 / font.unitsPerEm * 1000;
 
       let x = 0;
       const y = 0;
-      path.extend(zero.getPath(x, y, font_size))
+      path.extend(zero.getPath(x, y, 1000))
       x += zero.advanceWidth * scale
-      path.extend(aleph.getPath(x, y, font_size))
+      path.extend(aleph.getPath(x, y, 1000))
       // ============================================
 
       const bb = path.getBoundingBox();
-      for (let cmd of path.commands) {
-        if (cmd.x !== undefined) { cmd.x -= bb.x1; }
-        if (cmd.x1 !== undefined) { cmd.x1 -= bb.x1; }
-        if (cmd.y !== undefined) { cmd.y -= bb.y1; }
-        if (cmd.y1 !== undefined) { cmd.y1 -= bb.y1; }
-      }
-
+      const width = bb.x2 - bb.x1;
+      const height = bb.y2 - bb.y1;
       var svg_blob = new Blob([
-        '<svg xmlns="http://www.w3.org/2000/svg">',
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${bb.x1} ${bb.y1} ${width} ${height}">`,
         path.toSVG(),
         "</svg>"],
       );
-      console.log(svg_blob)
       var svg_dl = document.createElement("a");
       svg_dl.href = URL.createObjectURL(svg_blob);
       svg_dl.download = "alephzero.svg";
