@@ -1,9 +1,9 @@
 <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
 
 <script>
-const url_params = new URLSearchParams(window.location.search);
+  const url_params = new URLSearchParams(window.location.search);
 
-opentype.load(
+  opentype.load(
     'gveret-levin/font-files/web/GveretLevinAlefAlefAlef-Regular.woff',
     (err, font) => {
       if (err) {
@@ -30,17 +30,28 @@ opentype.load(
       // ============================================
 
       const bb = path.getBoundingBox();
-      const width = bb.x2 - bb.x1;
-      const height = bb.y2 - bb.y1;
-      var svg_blob = new Blob([
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${bb.x1} ${bb.y1} ${width} ${height}">`,
+      const stroke_width = 5;
+      const start = { x: bb.x1 - stroke_width, y: bb.y1 - stroke_width };
+      const width = bb.x2 - bb.x1 + (2 * stroke_width);
+      const height = bb.y2 - bb.y1 + (2 * stroke_width);
+      let svg_blob = new Blob([
+        `<svg xmlns="http://www.w3.org/2000/svg"
+              viewBox="${start.x} ${start.y} ${width} ${height}"
+              style="stroke: white; stroke-width: ${stroke_width};">`,
         path.toSVG(),
         "</svg>"],
       );
-      var svg_dl = document.createElement("a");
+
+      // Display the generated data.
+      const svg_div = document.createElement("div");
+      document.body.appendChild(svg_div);
+      svg_blob.text().then(text => svg_div.innerHTML += text);
+
+      // Download the generated data.
+      const svg_dl = document.createElement("a");
       svg_dl.href = URL.createObjectURL(svg_blob);
       svg_dl.download = "alephzero.svg";
       svg_dl.click();
     }
-);
+  );
 </script>
