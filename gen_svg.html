@@ -3,6 +3,13 @@
 <script>
   const url_params = new URLSearchParams(window.location.search);
 
+  function download(name, href) {
+    const link = document.createElement("a");
+    link.download = name;
+    link.href = href;
+    link.click();
+  }
+
   opentype.load(
     'gveret-levin/font-files/web/GveretLevinAlefAlefAlef-Regular.woff',
     (err, font) => {
@@ -34,24 +41,36 @@
       const start = { x: bb.x1 - stroke_width, y: bb.y1 - stroke_width };
       const width = bb.x2 - bb.x1 + (2 * stroke_width);
       const height = bb.y2 - bb.y1 + (2 * stroke_width);
-      let svg_blob = new Blob([
+      const svg_blob = new Blob([
         `<svg xmlns="http://www.w3.org/2000/svg"
               viewBox="${start.x} ${start.y} ${width} ${height}"
               style="stroke: white; stroke-width: ${stroke_width};">`,
         path.toSVG(),
         "</svg>"],
+        { type: "image/svg+xml;charset=utf-8" }
       );
+      const svg_obj = URL.createObjectURL(svg_blob);
 
       // Display the generated data.
       const svg_div = document.createElement("div");
       document.body.appendChild(svg_div);
       svg_blob.text().then(text => svg_div.innerHTML += text);
 
-      // Download the generated data.
-      const svg_dl = document.createElement("a");
-      svg_dl.href = URL.createObjectURL(svg_blob);
-      svg_dl.download = "alephzero.svg";
-      svg_dl.click();
+      // Download an SVG Image.
+      download("alephzero.svg", svg_obj);
+
+      // Download a PNG Image.
+      const png_img = new Image();
+      png_img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        context.drawImage(png_img, 0, 0, width, height);
+
+        download("alephzero.png", canvas.toDataURL());
+      };
+      png_img.src = svg_obj;
     }
   );
 </script>
